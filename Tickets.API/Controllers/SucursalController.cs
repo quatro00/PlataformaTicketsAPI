@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Tickets.API.Data;
 using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Sucursal;
+using Tickets.API.Repositories.Implementation;
+using Tickets.API.Repositories.Interface;
 
 namespace Tickets.API.Controllers
 {
@@ -12,14 +14,36 @@ namespace Tickets.API.Controllers
     public class SucursalController : ControllerBase
     {
         private readonly TicketsDbContext dbContext;
-        public SucursalController(TicketsDbContext dbContext)
+        private readonly ISucursalRepository sucursalRepository;
+        public SucursalController(ISucursalRepository sucursalRepository)
         {
-            this.dbContext = dbContext;
+            this.sucursalRepository = sucursalRepository;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetAllSucursales()
+        {
+            var sucursales = await sucursalRepository.GetAllAsync();
+            List<SucursalDto> response = new List<SucursalDto>();
+            foreach (var item in sucursales) {
+                response.Add(new SucursalDto() { 
+                Id = item.Id,
+                Clave = item.Clave,
+                Nombre = item.Nombre,
+                Direccion = item.Direccion,
+                Telefono = item.Telefono,
+                Telefono2 = item.Telefono2,
+                Activo = item.Activo,
+                });
+            }
+            return Ok(response);
         }
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> CreateSucursal(CreateSucursalRequestDto request) 
         {
+            /*
             var sucursal = new Sucursal() {
                 Id = Guid.NewGuid(),
                 Clave = request.Clave,
@@ -44,8 +68,8 @@ namespace Tickets.API.Controllers
                 Telefono2 = sucursal.Telefono2,
                 Activo = sucursal.Activo
             };
-
-            return Ok(response);
+            */
+            return Ok();
         }
     }
 }
