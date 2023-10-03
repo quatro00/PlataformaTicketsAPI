@@ -23,11 +23,11 @@ namespace Tickets.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             //checamos el email
-            var identityUser = await userManager.FindByNameAsync(request.Email);
+            var identityUser = await userManager.FindByNameAsync(request.username);
 
             if (identityUser is not null)
             {
-                var checkPasswordResult = await userManager.CheckPasswordAsync(identityUser, request.Password);
+                var checkPasswordResult = await userManager.CheckPasswordAsync(identityUser, request.password);
 
                 if (checkPasswordResult)
                 {
@@ -38,7 +38,10 @@ namespace Tickets.API.Controllers
                     {
                         Email = identityUser.Email,
                         Roles = roles.ToList(),
-                        Token = jwtToken
+                        Token = jwtToken,
+                        Nombre = "Juan",
+                        Apellidos ="Perez",
+                        Username = identityUser.UserName
                     };
 
                     return Ok(response);
