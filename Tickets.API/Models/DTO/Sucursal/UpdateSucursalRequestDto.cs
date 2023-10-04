@@ -1,6 +1,6 @@
 ﻿namespace Tickets.API.Models.DTO.Sucursal
 {
-    public class CreateSucursalRequestDto
+    public class UpdateSucursalRequestDto
     {
         public string clave { get; set; } = null!;
 

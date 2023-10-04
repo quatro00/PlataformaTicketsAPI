@@ -43,33 +43,31 @@ namespace Tickets.API.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> CreateSucursal(CreateSucursalRequestDto request) 
         {
-            /*
-            var sucursal = new Sucursal() {
-                Id = Guid.NewGuid(),
-                Clave = request.Clave,
-                Nombre = request.Nombre,
-                Direccion = request.Direccion,
-                Telefono = request.Telefono,
-                Telefono2 = request.Telefono2,
-                Activo = request.Activo,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacionId = Guid.NewGuid(),
-            };
-
-            await dbContext.Sucursals.AddAsync(sucursal);
-            await dbContext.SaveChangesAsync();
-
-            var response = new SucursalDto()
+            Sucursal sucursal = await sucursalRepository.CreateAsync(request);
+            SucursalDto sucursalDto = new SucursalDto()
             {
                 Clave = sucursal.Clave,
-                Nombre = sucursal.Nombre,
-                Direccion = sucursal.Direccion,
-                Telefono = sucursal.Telefono,
-                Telefono2 = sucursal.Telefono2,
-                Activo = sucursal.Activo
+                Nombre= sucursal.Nombre,
+                Direccion= sucursal.Direccion,
+                Telefono= sucursal.Telefono,
+                Telefono2= sucursal.Telefono2,
+                Activo= sucursal.Activo,
+                Id = sucursal.Id
             };
-            */
-            return Ok();
+            return Ok(sucursal);
+        }
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> UpdateSucursal([FromRoute] Guid id,[FromBody] UpdateSucursalRequestDto request)
+        {
+            var updatedItem = await sucursalRepository.UpdateAsync(request, id);
+
+            if(updatedItem == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(request);
         }
     }
 }
