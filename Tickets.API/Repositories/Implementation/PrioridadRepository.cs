@@ -15,10 +15,9 @@ namespace Tickets.API.Repositories.Implementation
         }
         public async Task<PrioridadDto> CreateAsync(PrioridadDto request)
         {
-            request.Id = Guid.NewGuid();
             Prioridad model = new Prioridad()
             {
-                Id = request.Id,
+                Id = Guid.NewGuid(),
                 SucursalId = request.SucursalId,
                 Nombre = request.Nombre,
                 Descripcion = request.Descripcion,
