@@ -49,7 +49,8 @@ namespace Tickets.API.Controllers
 
             }
 
-            ModelState.AddModelError("", "Email o password incorrecto.");
+            ModelState.AddModelError("error", "Email o password incorrecto.");
+            ModelState.AddModelError("error", "Email o password incorrecto.");
             return ValidationProblem(ModelState);
         }
     }

@@ -28,6 +28,7 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<ISucursalRepository, SucursalRepository>();
+builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()

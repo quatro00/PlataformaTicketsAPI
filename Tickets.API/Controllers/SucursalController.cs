@@ -37,12 +37,15 @@ namespace Tickets.API.Controllers
                 Activo = item.Activo,
                 });
             }
+
+            
             return Ok(response);
         }
         [HttpPost]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> CreateSucursal(CreateSucursalRequestDto request) 
         {
+            
             Sucursal sucursal = await sucursalRepository.CreateAsync(request);
             SucursalDto sucursalDto = new SucursalDto()
             {

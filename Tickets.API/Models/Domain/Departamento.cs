@@ -3,19 +3,17 @@ using System.Collections.Generic;
 
 namespace Tickets.API.Models.Domain;
 
-public partial class Sucursal
+public partial class Departamento
 {
     public Guid Id { get; set; }
 
+    public Guid SucursalId { get; set; }
+
     public string Clave { get; set; } = null!;
 
-    public string Nombre { get; set; } = null!;
-
-    public string Direccion { get; set; } = null!;
+    public string Descripcion { get; set; } = null!;
 
     public string Telefono { get; set; } = null!;
-
-    public string? Telefono2 { get; set; }
 
     public bool Activo { get; set; }
 
@@ -27,5 +25,5 @@ public partial class Sucursal
 
     public Guid? UsuarioModificacionId { get; set; }
 
-    public virtual ICollection<Departamento> Departamentos { get; set; } = new List<Departamento>();
+    public virtual Sucursal Sucursal { get; set; } = null!;
 }
