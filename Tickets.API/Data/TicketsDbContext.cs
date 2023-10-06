@@ -16,6 +16,8 @@ public partial class TicketsDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Area> Areas { get; set; }
+
     public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
 
     public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; }
@@ -30,6 +32,8 @@ public partial class TicketsDbContext : DbContext
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
+    public virtual DbSet<Prioridad> Prioridads { get; set; }
+
     public virtual DbSet<Sucursal> Sucursals { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -38,6 +42,30 @@ public partial class TicketsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Area>(entity =>
+        {
+            entity.ToTable("Area");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Clave)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(5000)
+                .IsUnicode(false);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.AreaPadre).WithMany(p => p.InverseAreaPadre)
+                .HasForeignKey(d => d.AreaPadreId)
+                .HasConstraintName("FK_Area_Area");
+
+            entity.HasOne(d => d.Departamento).WithMany(p => p.Areas)
+                .HasForeignKey(d => d.DepartamentoId)
+                .HasConstraintName("FK_Area_Departamento");
+        });
+
         modelBuilder.Entity<AspNetRole>(entity =>
         {
             entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
@@ -125,6 +153,29 @@ public partial class TicketsDbContext : DbContext
                 .HasForeignKey(d => d.SucursalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Departamento_Sucursal");
+        });
+
+        modelBuilder.Entity<Prioridad>(entity =>
+        {
+            entity.ToTable("Prioridad");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Color)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.NivelDePrioridad).HasColumnType("numeric(18, 2)");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.TiempoDeAtencion).HasColumnType("numeric(18, 2)");
+
+            entity.HasOne(d => d.Sucursal).WithMany(p => p.Prioridads)
+                .HasForeignKey(d => d.SucursalId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Prioridad_Sucursal");
         });
 
         modelBuilder.Entity<Sucursal>(entity =>

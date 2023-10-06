@@ -28,4 +28,6 @@ public partial class Sucursal
     public Guid? UsuarioModificacionId { get; set; }
 
     public virtual ICollection<Departamento> Departamentos { get; set; } = new List<Departamento>();
+
+    public virtual ICollection<Prioridad> Prioridads { get; set; } = new List<Prioridad>();
 }

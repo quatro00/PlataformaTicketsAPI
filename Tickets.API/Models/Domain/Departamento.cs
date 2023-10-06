@@ -25,5 +25,7 @@ public partial class Departamento
 
     public Guid? UsuarioModificacionId { get; set; }
 
+    public virtual ICollection<Area> Areas { get; set; } = new List<Area>();
+
     public virtual Sucursal Sucursal { get; set; } = null!;
 }
