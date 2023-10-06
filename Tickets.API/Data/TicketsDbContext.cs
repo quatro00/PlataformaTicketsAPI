@@ -30,9 +30,13 @@ public partial class TicketsDbContext : DbContext
 
     public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }
 
+    public virtual DbSet<Categorium> Categoria { get; set; }
+
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
     public virtual DbSet<Prioridad> Prioridads { get; set; }
+
+    public virtual DbSet<SubCategorium> SubCategoria { get; set; }
 
     public virtual DbSet<Sucursal> Sucursals { get; set; }
 
@@ -132,6 +136,22 @@ public partial class TicketsDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.AspNetUserTokens).HasForeignKey(d => d.UserId);
         });
 
+        modelBuilder.Entity<Categorium>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(5000)
+                .IsUnicode(false);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Sucursal).WithMany(p => p.Categoria)
+                .HasForeignKey(d => d.SucursalId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Categoria_Sucursal");
+        });
+
         modelBuilder.Entity<Departamento>(entity =>
         {
             entity.ToTable("Departamento");
@@ -176,6 +196,22 @@ public partial class TicketsDbContext : DbContext
                 .HasForeignKey(d => d.SucursalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Prioridad_Sucursal");
+        });
+
+        modelBuilder.Entity<SubCategorium>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(5000)
+                .IsUnicode(false);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Categoria).WithMany(p => p.SubCategoria)
+                .HasForeignKey(d => d.CategoriaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubCategoria_Categoria");
         });
 
         modelBuilder.Entity<Sucursal>(entity =>
