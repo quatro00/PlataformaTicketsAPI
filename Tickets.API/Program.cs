@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Tickets.API.Data;
+using Tickets.API.Helpers;
 using Tickets.API.Repositories.Implementation;
 using Tickets.API.Repositories.Interface;
 
@@ -30,6 +31,8 @@ builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<ISucursalRepository, SucursalRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<IPrioridadRepository, PrioridadRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<ISubCategoriaRepository, SubCategoriaRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
@@ -63,6 +66,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+ExtensionMethod.claimsPrincipalHelper = app.Services.GetService<IClaimsPrincipalHelper>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

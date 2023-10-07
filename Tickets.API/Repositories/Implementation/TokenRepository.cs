@@ -19,8 +19,9 @@ namespace Tickets.API.Repositories.Implementation
         public string CreateJwtToken(IdentityUser user, List<string> roles)
         {
             var claims = new List<Claim> 
-            { 
-                new Claim(ClaimTypes.Email, user.Email)
+            {
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("Id", user.Id),
             };
 
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));

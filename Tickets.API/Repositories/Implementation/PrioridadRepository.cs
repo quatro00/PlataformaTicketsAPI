@@ -59,7 +59,6 @@ namespace Tickets.API.Repositories.Implementation
         {
             var existingItem = await ticketsDbContext.Prioridads.FindAsync(id);
 
-
             if (existingItem == null)
             {
                 return null;

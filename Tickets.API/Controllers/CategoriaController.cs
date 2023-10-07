@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Tickets.API.Data;
 using Tickets.API.Models.Domain;
+using Tickets.API.Models.DTO.Categoria;
 using Tickets.API.Models.DTO.Departamento;
-using Tickets.API.Models.DTO.Prioridad;
 using Tickets.API.Repositories.Implementation;
 using Tickets.API.Repositories.Interface;
 using Tickets.API.Helpers;
@@ -14,40 +14,38 @@ namespace Tickets.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PrioridadController : ControllerBase
+    public class CategoriaController : ControllerBase
     {
         private readonly TicketsDbContext dbContext;
-        private readonly IPrioridadRepository prioridadRepository;
+        private readonly ICategoriaRepository categoriaRepository;
 
-        public PrioridadController(IPrioridadRepository prioridadRepository)
+        public CategoriaController(ICategoriaRepository categoriaRepository)
         {
-            this.prioridadRepository = prioridadRepository;
+            this.categoriaRepository = categoriaRepository;
         }
-
         [HttpGet]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()
         {
-            //User.FindFirst("Id").Value
-            var response = await prioridadRepository.GetAllAsync();
+            var response = await categoriaRepository.GetAllAsync();
 
             return Ok(response);
         }
         [HttpPost]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> Create(PrioridadDto request)
+        public async Task<IActionResult> Create(CategoriaDto request)
         {
+            var response = await categoriaRepository.CreateAsync(request);
 
-            var response = await prioridadRepository.CreateAsync(request);
-           
             return Ok(response);
         }
         [HttpPut]
         [Authorize(Roles = "Administrador")]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] PrioridadDto request)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CategoriaDto request)
         {
-            var updatedItem = await prioridadRepository.UpdateAsync(request, id);
+
+            var updatedItem = await categoriaRepository.UpdateAsync(request, id);
 
             if (updatedItem == null)
             {
