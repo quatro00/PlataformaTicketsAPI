@@ -196,6 +196,11 @@ public partial class TicketsDbContext : DbContext
             entity.Property(e => e.Nombre)
                 .HasMaxLength(500)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.Sucursal).WithMany(p => p.Equipos)
+                .HasForeignKey(d => d.SucursalId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Equipo_Sucursal");
         });
 
         modelBuilder.Entity<Prioridad>(entity =>

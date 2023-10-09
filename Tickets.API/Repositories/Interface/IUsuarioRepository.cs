@@ -8,6 +8,7 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> GetAll();
         Task<ResponseModel> CreateAsync(RequestUsuarioDto request, string user);
         Task<ResponseModel> UpdateAsync(RequestUsuarioDto request, Guid usuarioId);
-
+        Task<ResponseModel> GetAgentes(Guid sucursalId);
+        Task<ResponseModel> GetSupervisores(Guid sucursalId);
     }
 }

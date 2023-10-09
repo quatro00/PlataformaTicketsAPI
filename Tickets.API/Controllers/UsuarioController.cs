@@ -65,5 +65,34 @@ namespace Tickets.API.Controllers
 
             return Ok(response.result);
         }
+
+        [HttpGet("GetAgentes")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> GetAgentes([FromQuery] RequestGetAgenteDto request)
+        {
+            var response = await usuarioRepository.GetAgentes(request.SucursalId);
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+            }
+        [HttpGet("GetSupervisores")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> GetSupervisores([FromQuery] RequestGetAgenteDto request)
+        {
+            var response = await usuarioRepository.GetSupervisores(request.SucursalId);
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+        }
     }
 }

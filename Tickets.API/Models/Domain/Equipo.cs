@@ -26,4 +26,6 @@ public partial class Equipo
     public virtual ICollection<RelCategoriaEquipo> RelCategoriaEquipos { get; set; } = new List<RelCategoriaEquipo>();
 
     public virtual ICollection<RelUsuarioEquipo> RelUsuarioEquipos { get; set; } = new List<RelUsuarioEquipo>();
+
+    public virtual Sucursal Sucursal { get; set; } = null!;
 }

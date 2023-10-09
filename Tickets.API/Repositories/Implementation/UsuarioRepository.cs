@@ -128,6 +128,68 @@ namespace Tickets.API.Repositories.Implementation
             return rm;
         }
 
+        public async Task<ResponseModel> GetAgentes(Guid sucursalId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                var usuariosAgente = await userManager.GetUsersInRoleAsync("Agente");
+                
+                var usuarios = await ticketsDbContext.Usuarios.Where(x=>x.SucursalId == sucursalId).ToListAsync();
+
+                var result = usuarios.Join(usuariosAgente,
+                               c => c.LoginId,
+                                m => m.Id,
+                               (c, m) => new
+                               {
+                                   id = c.Id,
+                                   matricula = c.Matricula,
+                                   nombre = c.Nombre + " " + c.Apellidos,
+                               }).ToList();
+                    
+               
+                rm.result = result;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
+        }
+        public async Task<ResponseModel> GetSupervisores(Guid sucursalId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                var usuariosAgente = await userManager.GetUsersInRoleAsync("Supervisor");
+
+                var usuarios = await ticketsDbContext.Usuarios.Where(x => x.SucursalId == sucursalId).ToListAsync();
+
+                var result = usuarios.Join(usuariosAgente,
+                               c => c.LoginId,
+                                m => m.Id,
+                               (c, m) => new
+                               {
+                                   id = c.Id,
+                                   matricula = c.Matricula,
+                                   nombre = c.Nombre + " " + c.Apellidos,
+                               }).ToList();
+
+
+                rm.result = result;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
+        }
         public async Task<ResponseModel> UpdateAsync(RequestUsuarioDto request, Guid usuarioId)
         {
             ResponseModel rm = new ResponseModel();
