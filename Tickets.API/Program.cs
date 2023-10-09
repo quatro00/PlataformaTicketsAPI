@@ -34,6 +34,7 @@ builder.Services.AddScoped<IPrioridadRepository, PrioridadRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<ISubCategoriaRepository, SubCategoriaRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()

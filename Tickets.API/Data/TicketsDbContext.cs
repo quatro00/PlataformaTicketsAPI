@@ -34,11 +34,19 @@ public partial class TicketsDbContext : DbContext
 
     public virtual DbSet<Departamento> Departamentos { get; set; }
 
+    public virtual DbSet<Equipo> Equipos { get; set; }
+
     public virtual DbSet<Prioridad> Prioridads { get; set; }
+
+    public virtual DbSet<RelCategoriaEquipo> RelCategoriaEquipos { get; set; }
+
+    public virtual DbSet<RelUsuarioEquipo> RelUsuarioEquipos { get; set; }
 
     public virtual DbSet<SubCategorium> SubCategoria { get; set; }
 
     public virtual DbSet<Sucursal> Sucursals { get; set; }
+
+    public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -175,6 +183,21 @@ public partial class TicketsDbContext : DbContext
                 .HasConstraintName("FK_Departamento_Sucursal");
         });
 
+        modelBuilder.Entity<Equipo>(entity =>
+        {
+            entity.ToTable("Equipo");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(5000)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Prioridad>(entity =>
         {
             entity.ToTable("Prioridad");
@@ -196,6 +219,40 @@ public partial class TicketsDbContext : DbContext
                 .HasForeignKey(d => d.SucursalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Prioridad_Sucursal");
+        });
+
+        modelBuilder.Entity<RelCategoriaEquipo>(entity =>
+        {
+            entity.HasKey(e => new { e.CategoriaId, e.EquipoId });
+
+            entity.ToTable("RelCategoriaEquipo");
+
+            entity.HasOne(d => d.Categoria).WithMany(p => p.RelCategoriaEquipos)
+                .HasForeignKey(d => d.CategoriaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RelCategoriaEquipo_Categoria");
+
+            entity.HasOne(d => d.Equipo).WithMany(p => p.RelCategoriaEquipos)
+                .HasForeignKey(d => d.EquipoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RelCategoriaEquipo_Equipo");
+        });
+
+        modelBuilder.Entity<RelUsuarioEquipo>(entity =>
+        {
+            entity.HasKey(e => new { e.UsuarioId, e.EquipoId });
+
+            entity.ToTable("RelUsuarioEquipo");
+
+            entity.HasOne(d => d.Equipo).WithMany(p => p.RelUsuarioEquipos)
+                .HasForeignKey(d => d.EquipoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RelUsuarioEquipo_Equipo");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.RelUsuarioEquipos)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RelUsuarioEquipo_Usuario");
         });
 
         modelBuilder.Entity<SubCategorium>(entity =>
@@ -238,6 +295,37 @@ public partial class TicketsDbContext : DbContext
             entity.Property(e => e.Telefono2)
                 .HasMaxLength(500)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Perfil");
+
+            entity.ToTable("Usuario");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Apellidos)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.CorreoElectronico)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.LoginId).HasMaxLength(450);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Login).WithMany(p => p.Usuarios)
+                .HasForeignKey(d => d.LoginId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Usuario_AspNetUsers");
+
+            entity.HasOne(d => d.Sucursal).WithMany(p => p.Usuarios)
+                .HasForeignKey(d => d.SucursalId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Usuario_Sucursal");
         });
 
         OnModelCreatingPartial(modelBuilder);

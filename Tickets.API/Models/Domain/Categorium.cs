@@ -15,6 +15,8 @@ public partial class Categorium
 
     public bool Activo { get; set; }
 
+    public virtual ICollection<RelCategoriaEquipo> RelCategoriaEquipos { get; set; } = new List<RelCategoriaEquipo>();
+
     public virtual ICollection<SubCategorium> SubCategoria { get; set; } = new List<SubCategorium>();
 
     public virtual Sucursal Sucursal { get; set; } = null!;

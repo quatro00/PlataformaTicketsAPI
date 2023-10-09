@@ -32,4 +32,6 @@ public partial class Sucursal
     public virtual ICollection<Departamento> Departamentos { get; set; } = new List<Departamento>();
 
     public virtual ICollection<Prioridad> Prioridads { get; set; } = new List<Prioridad>();
+
+    public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
 }

@@ -43,7 +43,6 @@ namespace Tickets.API.Repositories.Implementation
                 rm.SetResponse(false, "Ocurrio un error inesperado.");
             }
             
-
             return rm;
         }
 
