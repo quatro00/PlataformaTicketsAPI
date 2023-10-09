@@ -39,6 +39,32 @@ namespace Tickets.API.Controllers
 
             return Ok(response);
         }
+        [HttpPost("AsignarEquipo")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> AsignarEquipo(AsignarEquipoDto request)
+        {
+            var response = await categoriaRepository.AsignarEquipo(request);
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response);
+        }
+
+        [HttpPost("DesasignarEquipo")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> DesasignarEquipo(AsignarEquipoDto request)
+        {
+            var response = await categoriaRepository.DesasignarEquipo(request);
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response);
+        }
+
         [HttpPut]
         [Authorize(Roles = "Administrador")]
         [Route("{id:Guid}")]

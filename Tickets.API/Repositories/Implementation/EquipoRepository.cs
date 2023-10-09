@@ -178,6 +178,29 @@ namespace Tickets.API.Repositories.Implementation
             return rm;
         }
 
+        public async Task<ResponseModel> GetEquiposSucursal(GetEquipoSucursalDto model)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                List<EquipoListDto> result = new List<EquipoListDto>();
+                List<Equipo> equipos = await ticketsDbContext.Equipos
+                    .Where(x=>x.SucursalId == model.sucursalId)
+                    .ToListAsync();
+               
+                foreach(var item in equipos)
+                rm.result = equipos;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
+        }
+
         public Task<ResponseModel> UpdateAsync(EquipoDto request, Guid usuarioId)
         {
             throw new NotImplementedException();

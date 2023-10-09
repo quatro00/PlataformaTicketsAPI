@@ -10,7 +10,14 @@
         public string Nombre { get; set; }
 
         public string Descripcion { get; set; }
+        public List<CategoriaEqupoListDto> Equipos { get; set; }
 
         public bool Activo { get; set; }
+    }
+
+    public class CategoriaEqupoListDto
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; set; }
     }
 }

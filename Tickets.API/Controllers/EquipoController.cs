@@ -35,6 +35,19 @@ namespace Tickets.API.Controllers
             }
             return Ok(response.result);
         }
+        [HttpGet("GetEquiposSucursal")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> GetEquiposSucursal([FromQuery] GetEquipoSucursalDto model)
+        {
+            //User.FindFirst("Id").Value
+            var response = await equipoRepository.GetEquiposSucursal(model);
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response.result);
+        }
         [HttpPost]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create(EquipoDto request)

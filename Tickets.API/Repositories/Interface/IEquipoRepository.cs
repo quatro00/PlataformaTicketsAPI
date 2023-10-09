@@ -10,5 +10,6 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> UpdateAsync(EquipoDto request, Guid usuarioId);
         Task<ResponseModel> AsignarUsuario(AsignarUsuarioDto request);
         Task<ResponseModel> DesasignarUsuario(AsignarUsuarioDto request);
+        Task<ResponseModel> GetEquiposSucursal(GetEquipoSucursalDto model);
     }
 }
