@@ -74,7 +74,6 @@ namespace Tickets.API.Repositories.Implementation
 
             return rm;
         }
-
         public async Task<ResponseModel> GetAll()
         {
             ResponseModel rm = new ResponseModel();
@@ -127,7 +126,6 @@ namespace Tickets.API.Repositories.Implementation
 
             return rm;
         }
-
         public async Task<ResponseModel> GetAgentes(Guid sucursalId)
         {
             ResponseModel rm = new ResponseModel();
@@ -225,6 +223,34 @@ namespace Tickets.API.Repositories.Implementation
                 usuario.SucursalId = request.SucursalId;
                 usuario.CorreoElectronico = request.CorreoElectronico;
                 await ticketsDbContext.SaveChangesAsync();
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
+        }
+
+        public async Task<ResponseModel> GetPerfil(Guid userId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                PerfilDto result = new PerfilDto();
+                var usuario = await ticketsDbContext.Usuarios.Include(x=>x.Sucursal).Where(x=>x.Id == userId).FirstOrDefaultAsync();
+                var identityUser = await userManager.FindByIdAsync(usuario.LoginId);
+
+                result.Matricula = usuario.Matricula;
+                result.SucursalNombre = usuario.Sucursal.Clave + "-" + usuario.Sucursal.Nombre;
+                result.Nombre = usuario.Nombre;
+                result.Apellidos = usuario.Apellidos;
+                result.CorreoElectronico = usuario.CorreoElectronico;
+                result.Telefono = identityUser.PhoneNumber;
+
+                rm.result = result;
                 rm.SetResponse(true, "Datos guardados con éxito.");
 
             }

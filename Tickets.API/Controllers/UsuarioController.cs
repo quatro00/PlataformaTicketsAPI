@@ -94,5 +94,20 @@ namespace Tickets.API.Controllers
 
             return Ok(response.result);
         }
+
+        [HttpGet("GetPerfil")]
+        [Authorize]
+        public async Task<IActionResult> GetPerfil()
+        {
+            var response = await usuarioRepository.GetPerfil(Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+        }
     }
 }

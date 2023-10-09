@@ -10,5 +10,6 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> UpdateAsync(RequestUsuarioDto request, Guid usuarioId);
         Task<ResponseModel> GetAgentes(Guid sucursalId);
         Task<ResponseModel> GetSupervisores(Guid sucursalId);
+        Task<ResponseModel> GetPerfil(Guid userId);
     }
 }
