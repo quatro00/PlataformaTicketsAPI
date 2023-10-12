@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using Tickets.API.Data;
 using Tickets.API.Models;
 using Tickets.API.Models.Domain;
@@ -36,7 +37,6 @@ namespace Tickets.API.Repositories.Implementation
 
             return rm;
         }
-
         public async Task<ResponseModel> AsignarEquipo(AsignarEquipoDto request)
         {
             ResponseModel rm = new ResponseModel();
@@ -79,7 +79,6 @@ namespace Tickets.API.Repositories.Implementation
             
             return rm;
         }
-
         public async Task<CategoriaDto> CreateAsync(CategoriaDto request)
         {
             Categorium model = new Categorium()
@@ -95,9 +94,6 @@ namespace Tickets.API.Repositories.Implementation
             await this.ticketsDbContext.SaveChangesAsync();
             return request;
         }
-
-        
-
         public async Task<IEnumerable<CategoriaListDto>> GetAllAsync()
         {
             List<Categorium> categorias = await ticketsDbContext.Categoria
@@ -130,7 +126,6 @@ namespace Tickets.API.Repositories.Implementation
 
             return result;
         }
-
         public async Task<CategoriaDto> UpdateAsync(CategoriaDto request, Guid id)
         {
             var existingItem = await ticketsDbContext.Categoria.FindAsync(id);
@@ -148,6 +143,52 @@ namespace Tickets.API.Repositories.Implementation
             await ticketsDbContext.SaveChangesAsync();
 
             return request;
+        }
+        public async Task<ResponseModel> GetCategorias(Guid sucursalId)
+        {
+            ResponseModel rm = new ResponseModel();
+
+            try
+            {
+                //buscamos si el usuario ya esta asignado al mismo equipo
+                List<Categorium> categorias = await ticketsDbContext.Categoria
+                 .Include(x => x.Sucursal)
+                 .Include(x => x.RelCategoriaEquipos).ThenInclude(x => x.Equipo)
+                 .Where(x => x.SucursalId == sucursalId)
+                 .ToListAsync();
+                List<CategoriaListDto> result = new List<CategoriaListDto>();
+                foreach (var item in categorias)
+                {
+                    List<CategoriaEqupoListDto> equipos = new List<CategoriaEqupoListDto>();
+                    foreach (var relEquipo in item.RelCategoriaEquipos)
+                    {
+                        equipos.Add(new CategoriaEqupoListDto()
+                        {
+                            Id = relEquipo.Equipo.Id,
+                            Nombre = relEquipo.Equipo.Nombre
+                        });
+                    }
+                    result.Add(new CategoriaListDto()
+                    {
+                        Id = item.Id,
+                        SucursalId = item.SucursalId,
+                        SucursalClave = item.Sucursal.Clave,
+                        SucursalNombre = item.Sucursal.Nombre,
+                        Nombre = item.Nombre,
+                        Descripcion = item.Descripcion,
+                        Equipos = equipos,
+                        Activo = item.Activo
+                    });
+                }
+                rm.result = result;
+                rm.SetResponse(true, "");
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
         }
     }
 }

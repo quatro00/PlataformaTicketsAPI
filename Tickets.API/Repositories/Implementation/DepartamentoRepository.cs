@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using Tickets.API.Data;
+using Tickets.API.Models;
 using Tickets.API.Models.Domain;
+using Tickets.API.Models.DTO.Area;
 using Tickets.API.Models.DTO.Departamento;
 using Tickets.API.Repositories.Interface;
 
@@ -36,6 +39,22 @@ namespace Tickets.API.Repositories.Implementation
         public async Task<IEnumerable<Departamento>> GetAllAsync()
         {
             return await ticketsDbContext.Departamentos.Include(x=>x.Sucursal).ToListAsync();
+        }
+
+        public async Task<ResponseModel> GetDepartamentos(Guid sucursalId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                rm.result = await ticketsDbContext.Departamentos.Where(x=>x.SucursalId == sucursalId).Include(x => x.Sucursal).ToListAsync(); ;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
         }
 
         public async Task<Departamento> UpdateAsync(UpdateDepartamentoDto request, Guid id)

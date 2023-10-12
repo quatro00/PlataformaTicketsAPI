@@ -21,5 +21,9 @@ namespace Tickets.API.Helpers
             return User.FindFirst("Id").Value;
         }
 
+        public static string GetSucursalId(this ClaimsPrincipal User)
+        {
+            return User.FindFirst("SucursalId").Value;
+        }
     }
 }

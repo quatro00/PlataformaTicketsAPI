@@ -56,5 +56,18 @@ namespace Tickets.API.Controllers
 
             return Ok(request);
         }
+        [HttpGet("GetPrioridades")]
+        [Authorize(Roles = "Agente,Administrador,Supervisor,Cliente")]
+        public async Task<IActionResult> GetPrioridades()
+        {
+
+            var response = await prioridadRepository.GetPrioridades(Guid.Parse(User.GetSucursalId()));
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response.result);
+        }
     }
 }

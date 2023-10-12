@@ -1,4 +1,5 @@
-﻿using Tickets.API.Models.Domain;
+﻿using Tickets.API.Models;
+using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Departamento;
 using Tickets.API.Models.DTO.Sucursal;
 
@@ -9,5 +10,6 @@ namespace Tickets.API.Repositories.Interface
         Task<IEnumerable<Departamento>> GetAllAsync();
         Task<Departamento> CreateAsync(CreateDepartamentoDto request);
         Task<Departamento> UpdateAsync(UpdateDepartamentoDto request, Guid id);
+        Task<ResponseModel> GetDepartamentos(Guid sucursalId);
     }
 }

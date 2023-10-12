@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tickets.API.Data;
+using Tickets.API.Models;
 using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Categoria;
 using Tickets.API.Models.DTO.SubCategoria;
@@ -51,6 +52,41 @@ namespace Tickets.API.Repositories.Implementation
             }
 
             return result;
+        }
+
+        public async Task<ResponseModel> GetSubCategorias(Guid categoriaId)
+        {
+            ResponseModel rm = new ResponseModel();
+
+            try
+            {
+                List<SubCategorium> categorias = await ticketsDbContext.SubCategoria.Include(x => x.Categoria.Sucursal).Where(x=>x.CategoriaId == categoriaId).ToListAsync();
+                List<SubCategoriaListDto> result = new List<SubCategoriaListDto>();
+                foreach (var item in categorias)
+                {
+                    result.Add(new SubCategoriaListDto()
+                    {
+                        Id = item.Id,
+                        SucursalId = item.Categoria.SucursalId,
+                        SucursalNombre = item.Categoria.Sucursal.Nombre,
+                        SucursalClave = item.Categoria.Sucursal.Clave,
+                        CategoriaId = item.Categoria.Id,
+                        CategoriaName = item.Categoria.Nombre,
+                        Nombre = item.Nombre,
+                        Descripcion = item.Descripcion,
+                        Activo = item.Activo
+                    });
+                }
+
+                rm.result = result;
+                rm.SetResponse(true, "");
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
         }
 
         public async Task<SubCategoriaDto> UpdateAsync(SubCategoriaDto request, Guid id)

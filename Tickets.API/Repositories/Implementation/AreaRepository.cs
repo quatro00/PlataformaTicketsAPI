@@ -46,6 +46,64 @@ namespace Tickets.API.Repositories.Implementation
             return rm;
         }
 
+        public async Task<ResponseModel> GetAreas(Guid departamentoId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                List<Area> areaList = await this.ticketsDbContext.Areas.Include(x => x.InverseAreaPadre).Where(x => x.DepartamentoId == departamentoId && x.AreaPadreId == null).ToListAsync();
+                List<AreaTreeDto> areaDtos = new List<AreaTreeDto>();
+                foreach (var item in areaList)
+                {
+                    AreaTreeDto area = new AreaTreeDto()
+                    {
+                        value = item.Id.ToString(),
+                        label = item.Clave + "-" + item.Nombre,
+                        isLeaf = true,
+                    };
+                    area.children = await GetAreasAnidadasTree(area);
+                    if(area.children.Count > 0) { area.isLeaf = false; }
+                    else { area.isLeaf = true; }
+                    areaDtos.Add(area);
+                }
+                areaDtos.Add(new AreaTreeDto() { children = new List<AreaTreeDto>(), isLeaf = true, label = "Ninguno", value = departamentoId.ToString() });
+                rm.result = areaDtos;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+        private async Task<List<AreaTreeDto>> GetAreasAnidadasTree(AreaTreeDto requestArea)
+        {
+            List<Area> areaList = await this.ticketsDbContext.Areas.Where(x => x.AreaPadreId == Guid.Parse(requestArea.value)).ToListAsync();
+            List<AreaTreeDto> areaDtos = new List<AreaTreeDto>();
+
+            foreach (var item in areaList)
+            {
+                AreaTreeDto areaAux = new AreaTreeDto()
+                {
+                    value = item.Id.ToString(),
+                    label = item.Clave + "-" + item.Nombre,
+                    isLeaf = true,
+                };
+                areaAux.children = await GetAreasAnidadasTree(areaAux);
+                
+                if (areaAux.children.Count > 0) { areaAux.isLeaf = false; }
+                else { areaAux.isLeaf = true; }
+                areaDtos.Add(areaAux);
+
+            }
+
+            areaDtos.Add(new AreaTreeDto() { children = new List<AreaTreeDto>(), isLeaf = true, label = "Ninguno", value = requestArea.value });
+            return areaDtos;
+        }
+
+
+
         public async Task<ResponseModel> GetAreasByDepartamento(GetAreasByDepartamentoRequestDto request)
         {
             ResponseModel rm = new ResponseModel();
@@ -102,5 +160,6 @@ namespace Tickets.API.Repositories.Implementation
 
             return areaDtos;
         }
+
     }
 }

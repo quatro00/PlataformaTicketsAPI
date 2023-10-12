@@ -34,4 +34,12 @@ public partial class Usuario
     public virtual ICollection<RelUsuarioEquipo> RelUsuarioEquipos { get; set; } = new List<RelUsuarioEquipo>();
 
     public virtual Sucursal Sucursal { get; set; } = null!;
+
+    public virtual ICollection<TicketArchivo> TicketArchivos { get; set; } = new List<TicketArchivo>();
+
+    public virtual ICollection<TicketComentario> TicketComentarios { get; set; } = new List<TicketComentario>();
+
+    public virtual ICollection<Ticket> TicketUsuarioCreacions { get; set; } = new List<Ticket>();
+
+    public virtual ICollection<Ticket> TicketUsuarioUltimaModificacionNavigations { get; set; } = new List<Ticket>();
 }

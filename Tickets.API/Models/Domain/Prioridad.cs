@@ -22,4 +22,6 @@ public partial class Prioridad
     public bool Activo { get; set; }
 
     public virtual Sucursal Sucursal { get; set; } = null!;
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

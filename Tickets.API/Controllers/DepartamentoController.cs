@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Tickets.API.Data;
+using Tickets.API.Helpers;
 using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Departamento;
 using Tickets.API.Models.DTO.Sucursal;
@@ -22,6 +23,42 @@ namespace Tickets.API.Controllers
         {
             this.departamentoRepository = departamentoRepository;
         }
+        [HttpGet("GetDepartamentos")]
+        [Authorize(Roles = "Agente,Administrador,Supervisor,Cliente")]
+        public async Task<IActionResult> GetDepartamentos()
+        {
+
+            var departamentos = await departamentoRepository.GetDepartamentos(Guid.Parse(User.GetSucursalId()));
+
+            if (!departamentos.response)
+            {
+                ModelState.AddModelError("error", departamentos.message);
+                return ValidationProblem(ModelState);
+            }
+
+            List<GetDepartamentoResponseDto> response = new List<GetDepartamentoResponseDto>();
+            foreach (var item in departamentos.result)
+            {
+                response.Add(new GetDepartamentoResponseDto()
+                {
+                    id = item.Id,
+                    sucursalId = item.Sucursal.Id,
+                    sucursal = item.Sucursal.Nombre,
+                    sucursalClave = item.Sucursal.Clave,
+                    clave = item.Clave,
+                    telefono = item.Telefono,
+                    descripcion = item.Descripcion,
+                    activo = item.Activo,
+                });
+            }
+
+
+            return Ok(response);
+        }
+
+
+
+
         [HttpGet]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()

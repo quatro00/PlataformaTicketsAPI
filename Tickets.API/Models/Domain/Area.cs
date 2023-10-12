@@ -24,4 +24,6 @@ public partial class Area
     public virtual Departamento? Departamento { get; set; }
 
     public virtual ICollection<Area> InverseAreaPadre { get; set; } = new List<Area>();
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

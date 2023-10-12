@@ -16,4 +16,6 @@ public partial class SubCategorium
     public bool Activo { get; set; }
 
     public virtual Categorium Categoria { get; set; } = null!;
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

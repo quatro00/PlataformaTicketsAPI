@@ -1,4 +1,5 @@
-﻿using Tickets.API.Models.DTO.SubCategoria;
+﻿using Tickets.API.Models;
+using Tickets.API.Models.DTO.SubCategoria;
 
 namespace Tickets.API.Repositories.Interface
 {
@@ -7,5 +8,6 @@ namespace Tickets.API.Repositories.Interface
         Task<IEnumerable<SubCategoriaListDto>> GetAllAsync();
         Task<SubCategoriaDto> CreateAsync(SubCategoriaDto request);
         Task<SubCategoriaDto> UpdateAsync(SubCategoriaDto request, Guid id);
+        Task<ResponseModel> GetSubCategorias(Guid categoriaId);
     }
 }

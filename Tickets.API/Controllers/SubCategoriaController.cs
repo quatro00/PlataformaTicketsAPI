@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Security.Claims;
 using Tickets.API.Data;
+using Tickets.API.Helpers;
 using Tickets.API.Models.DTO.Categoria;
 using Tickets.API.Models.DTO.SubCategoria;
+using Tickets.API.Repositories.Implementation;
 using Tickets.API.Repositories.Interface;
 
 namespace Tickets.API.Controllers
@@ -21,6 +23,20 @@ namespace Tickets.API.Controllers
         {
             this.subCategoriaRepository = subCategoriaRepository;
         }
+        [HttpGet("GetSubCategorias/{id:Guid}")]
+        [Authorize(Roles = "Agente,Administrador,Supervisor,Cliente")]
+        public async Task<IActionResult> GetSubCategorias([FromRoute] Guid id)
+        {
+
+            var response = await subCategoriaRepository.GetSubCategorias(id);
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response.result);
+        }
+
         [HttpGet]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()

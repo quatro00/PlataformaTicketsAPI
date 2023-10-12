@@ -244,11 +244,11 @@ namespace Tickets.API.Repositories.Implementation
                 var identityUser = await userManager.FindByIdAsync(usuario.LoginId);
 
                 result.Matricula = usuario.Matricula;
-                result.SucursalNombre = usuario.Sucursal.Clave + "-" + usuario.Sucursal.Nombre;
-                result.Nombre = usuario.Nombre;
-                result.Apellidos = usuario.Apellidos;
-                result.CorreoElectronico = usuario.CorreoElectronico;
-                result.Telefono = identityUser.PhoneNumber;
+                result.SucursalNombre = usuario.Sucursal.Clave ?? "" + "-" + usuario.Sucursal.Nombre ?? "";
+                result.Nombre = usuario.Nombre ?? "";
+                result.Apellidos = usuario.Apellidos ?? "";
+                result.CorreoElectronico = usuario.CorreoElectronico ?? "";
+                result.Telefono = identityUser.PhoneNumber ?? "";
 
                 rm.result = result;
                 rm.SetResponse(true, "Datos guardados con éxito.");

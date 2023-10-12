@@ -10,5 +10,6 @@ namespace Tickets.API.Repositories.Interface
         Task<CategoriaDto> UpdateAsync(CategoriaDto request, Guid id);
         Task<ResponseModel> AsignarEquipo(AsignarEquipoDto request);
         Task<ResponseModel> DesasignarEquipo(AsignarEquipoDto request);
+        Task<ResponseModel> GetCategorias(Guid sucursalId);
     }
 }

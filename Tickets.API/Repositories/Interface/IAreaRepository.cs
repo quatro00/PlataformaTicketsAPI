@@ -1,4 +1,5 @@
 ﻿using Tickets.API.Models;
+using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Area;
 using Tickets.API.Models.DTO.Categoria;
 
@@ -8,6 +9,6 @@ namespace Tickets.API.Repositories.Interface
     {
         Task<ResponseModel> CreateAreaBaseAsync(CreateAreaBaseRequestDto request);
         Task<ResponseModel> GetAreasByDepartamento(GetAreasByDepartamentoRequestDto request);
-        
+        Task<ResponseModel> GetAreas(Guid departamentoId);
     }
 }

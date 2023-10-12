@@ -60,5 +60,21 @@ namespace Tickets.API.Controllers
 
             return Ok(response.result);
         }
+
+        [HttpGet("GetAreas/{id:Guid}")]
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> GetAreas([FromRoute] Guid id)
+        {
+            var response = await areaRepository.GetAreas(id);
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+        }
+
     }
 }

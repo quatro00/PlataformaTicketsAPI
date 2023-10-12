@@ -46,6 +46,14 @@ public partial class TicketsDbContext : DbContext
 
     public virtual DbSet<Sucursal> Sucursals { get; set; }
 
+    public virtual DbSet<Ticket> Tickets { get; set; }
+
+    public virtual DbSet<TicketArchivo> TicketArchivos { get; set; }
+
+    public virtual DbSet<TicketComentario> TicketComentarios { get; set; }
+
+    public virtual DbSet<TicketEstatus> TicketEstatuses { get; set; }
+
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -300,6 +308,95 @@ public partial class TicketsDbContext : DbContext
             entity.Property(e => e.Telefono2)
                 .HasMaxLength(500)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Ticket>(entity =>
+        {
+            entity.ToTable("Ticket");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.Titulo).HasMaxLength(500);
+
+            entity.HasOne(d => d.Area).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.AreaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Ticket_Area");
+
+            entity.HasOne(d => d.Estatus).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.EstatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Ticket_TicketEstatus");
+
+            entity.HasOne(d => d.Prioridad).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.PrioridadId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Ticket_Prioridad");
+
+            entity.HasOne(d => d.SubCategoria).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.SubCategoriaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Ticket_SubCategoria");
+
+            entity.HasOne(d => d.UsuarioCreacion).WithMany(p => p.TicketUsuarioCreacions)
+                .HasForeignKey(d => d.UsuarioCreacionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Ticket_Usuario");
+
+            entity.HasOne(d => d.UsuarioUltimaModificacionNavigation).WithMany(p => p.TicketUsuarioUltimaModificacionNavigations)
+                .HasForeignKey(d => d.UsuarioUltimaModificacion)
+                .HasConstraintName("FK_Ticket_Usuario1");
+        });
+
+        modelBuilder.Entity<TicketArchivo>(entity =>
+        {
+            entity.ToTable("TicketArchivo");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.Nombre).HasMaxLength(500);
+            entity.Property(e => e.Tamaño).HasMaxLength(50);
+            entity.Property(e => e.Tipo).HasMaxLength(50);
+
+            entity.HasOne(d => d.Ticket).WithMany(p => p.TicketArchivos)
+                .HasForeignKey(d => d.TicketId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketArchivo_Ticket");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.TicketArchivos)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketArchivo_Usuario");
+        });
+
+        modelBuilder.Entity<TicketComentario>(entity =>
+        {
+            entity.ToTable("TicketComentario");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.Texto).HasColumnName("texto");
+
+            entity.HasOne(d => d.Ticket).WithMany(p => p.TicketComentarios)
+                .HasForeignKey(d => d.TicketId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketComentario_Ticket");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.TicketComentarios)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketComentario_Usuario");
+        });
+
+        modelBuilder.Entity<TicketEstatus>(entity =>
+        {
+            entity.HasKey(e => e.EstatusId);
+
+            entity.ToTable("TicketEstatus");
+
+            entity.Property(e => e.EstatusId).ValueGeneratedNever();
+            entity.Property(e => e.Descripcion).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Usuario>(entity =>

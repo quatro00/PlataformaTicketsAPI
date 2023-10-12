@@ -23,6 +23,21 @@ namespace Tickets.API.Controllers
         {
             this.categoriaRepository = categoriaRepository;
         }
+
+        [HttpGet("GetCategorias")]
+        [Authorize(Roles = "Agente,Administrador,Supervisor,Cliente")]
+        public async Task<IActionResult> GetCategorias()
+        {
+
+            var response = await categoriaRepository.GetCategorias(Guid.Parse(User.GetSucursalId()));
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response.result);
+        }
+
         [HttpGet]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()
