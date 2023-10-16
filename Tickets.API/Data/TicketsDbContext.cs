@@ -315,13 +315,13 @@ public partial class TicketsDbContext : DbContext
             entity.ToTable("Ticket");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.AreaString).HasMaxLength(500);
             entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
             entity.Property(e => e.Titulo).HasMaxLength(500);
 
             entity.HasOne(d => d.Area).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.AreaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Ticket_Area");
 
             entity.HasOne(d => d.Estatus).WithMany(p => p.Tickets)
@@ -356,6 +356,7 @@ public partial class TicketsDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Fecha).HasColumnType("datetime");
             entity.Property(e => e.Nombre).HasMaxLength(500);
+            entity.Property(e => e.NombreFisico).HasMaxLength(500);
             entity.Property(e => e.Tamaño).HasMaxLength(50);
             entity.Property(e => e.Tipo).HasMaxLength(50);
 

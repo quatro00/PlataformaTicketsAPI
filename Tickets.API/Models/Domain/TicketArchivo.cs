@@ -13,6 +13,8 @@ public partial class TicketArchivo
 
     public string Nombre { get; set; } = null!;
 
+    public string NombreFisico { get; set; } = null!;
+
     public string Tipo { get; set; } = null!;
 
     public string Tamaño { get; set; } = null!;

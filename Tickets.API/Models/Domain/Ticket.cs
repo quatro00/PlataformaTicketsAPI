@@ -7,7 +7,11 @@ public partial class Ticket
 {
     public Guid Id { get; set; }
 
-    public Guid AreaId { get; set; }
+    public Guid? AreaId { get; set; }
+
+    public Guid? DepartamentoId { get; set; }
+
+    public string? AreaString { get; set; }
 
     public int Folio { get; set; }
 
@@ -29,7 +33,7 @@ public partial class Ticket
 
     public Guid? UsuarioUltimaModificacion { get; set; }
 
-    public virtual Area Area { get; set; } = null!;
+    public virtual Area? Area { get; set; }
 
     public virtual TicketEstatus Estatus { get; set; } = null!;
 
