@@ -35,6 +35,8 @@ public partial class Ticket
 
     public virtual Area? Area { get; set; }
 
+    public virtual Departamento? Departamento { get; set; }
+
     public virtual TicketEstatus Estatus { get; set; } = null!;
 
     public virtual Prioridad Prioridad { get; set; } = null!;

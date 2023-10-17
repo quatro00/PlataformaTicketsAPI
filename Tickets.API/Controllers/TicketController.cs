@@ -101,11 +101,26 @@ namespace Tickets.API.Controllers
             return Ok(response.result);
         }
 
-        [HttpPost("GetUsuarioTickets")]
-        //[Authorize]
-        public async Task<IActionResult> GetUsuarioTickets(int? statusId)
+        [HttpGet("GetUsuarioTickets")]
+        [Authorize]
+        public async Task<IActionResult> GetUsuarioTickets([FromQuery] TicketByEstatusDto model)
         {
-            var response = await ticketRepository.GetUsuarioTickets(statusId, Guid.Parse("D70D6013-597A-48B5-9F74-699F788BCE73"));
+            var response = await ticketRepository.GetUsuarioTickets(model.estatusId, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+        }
+
+        [HttpGet("GetSupervisorTickets")]
+        [Authorize(Roles = "Supervisor")]
+        public async Task<IActionResult> GetSupervisorTickets([FromQuery] TicketByEstatusDto model)
+        {
+            var response = await ticketRepository.GetSupervisorTickets(model.estatusId,Guid.Parse(User.GetId()));
 
             if (!response.response)
             {

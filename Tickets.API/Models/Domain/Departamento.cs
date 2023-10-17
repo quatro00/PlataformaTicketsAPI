@@ -28,4 +28,6 @@ public partial class Departamento
     public virtual ICollection<Area> Areas { get; set; } = new List<Area>();
 
     public virtual Sucursal Sucursal { get; set; } = null!;
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

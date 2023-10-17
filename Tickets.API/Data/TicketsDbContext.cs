@@ -324,6 +324,10 @@ public partial class TicketsDbContext : DbContext
                 .HasForeignKey(d => d.AreaId)
                 .HasConstraintName("FK_Ticket_Area");
 
+            entity.HasOne(d => d.Departamento).WithMany(p => p.Tickets)
+                .HasForeignKey(d => d.DepartamentoId)
+                .HasConstraintName("FK_Ticket_Departamento");
+
             entity.HasOne(d => d.Estatus).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.EstatusId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -397,6 +401,7 @@ public partial class TicketsDbContext : DbContext
             entity.ToTable("TicketEstatus");
 
             entity.Property(e => e.EstatusId).ValueGeneratedNever();
+            entity.Property(e => e.Color).HasMaxLength(50);
             entity.Property(e => e.Descripcion).HasMaxLength(50);
         });
 

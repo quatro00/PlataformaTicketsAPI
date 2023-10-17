@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="Models\Domain\" />
+    <Folder Include="Models\NewFolder\" />
     <Folder Include="Temp\" />
   </ItemGroup>
 

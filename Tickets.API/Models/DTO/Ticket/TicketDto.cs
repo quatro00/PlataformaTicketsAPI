@@ -12,8 +12,10 @@
         public string Area { get; set; }
         public string Titulo { get; set; }
         public string Prioridad { get; set; }
-        public string Estatus { get; set; }
-        public string FchaCreacion { get; set; }
+        public decimal NivelDePrioridad { get; set; }
         public string Color { get; set; }
+        public string Estatus { get; set; }
+        public string EstatusColor { get; set; }
+        public string FechaCreacion { get; set; }
     }
 }
