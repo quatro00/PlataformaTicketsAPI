@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tickets.API.Data;
 using Tickets.API.Models;
 using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Equipo;
+using Tickets.API.Models.DTO.Ticket;
 using Tickets.API.Models.DTO.Usuario;
 using Tickets.API.Repositories.Interface;
 
@@ -100,6 +102,54 @@ namespace Tickets.API.Repositories.Implementation
                 await ticketsDbContext.RelUsuarioEquipos.Where(x => x.UsuarioId == request.UsuarioId && x.EquipoId == request.EquipoId).ExecuteDeleteAsync();
                 await ticketsDbContext.SaveChangesAsync();
                 rm.result = request;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+
+            return rm;
+        }
+
+        public async Task<ResponseModel> GetAgentesBySupervisor(Guid supervisorId, Guid ticketId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                List<AgenteDto> agentes = new List<AgenteDto>();
+
+                //obtenemos los equipos que es responsable el supervisor
+                var equiposAsignados = await this.ticketsDbContext.RelUsuarioEquipos.Where(x => x.UsuarioId == supervisorId && x.EsSupervisor && x.Activo).ToListAsync();
+                
+                
+                //buscamos la categoria del ticket
+                var categorias = await this.ticketsDbContext.Tickets
+                    .Include(x => x.SubCategoria)
+                    .ThenInclude(x => x.Categoria)
+                    .ThenInclude(x => x.RelCategoriaEquipos)
+                    .Where(x => x.Id == ticketId)
+                    .FirstOrDefaultAsync();
+
+                var equipos = categorias.SubCategoria.Categoria.RelCategoriaEquipos.ToList();
+
+                foreach(var item in equipos)
+                {
+                    //si el equipo es uno asignado agregamos todos los usuarios al final
+                    if(equiposAsignados.Where(x=>x.EquipoId == item.EquipoId).Count() > 0)
+                    {
+                        var usuarios = await this.ticketsDbContext.Usuarios.Include(x=>x.RelUsuarioEquipos).Where(x=>x.RelUsuarioEquipos.Any(x=>x.EquipoId == item.EquipoId)).ToListAsync();
+                        agentes.AddRange(usuarios.Select(x => new AgenteDto()
+                        {
+                            Id = x.Id,
+                            Nombre = x.Apellidos.Trim() + " " + x.Nombre
+                        }));
+                    }
+                }
+                
+
+                rm.result = agentes;
                 rm.SetResponse(true, "Datos guardados con éxito.");
 
             }

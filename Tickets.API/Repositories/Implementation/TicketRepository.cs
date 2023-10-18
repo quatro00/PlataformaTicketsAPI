@@ -8,6 +8,7 @@ using Tickets.API.Repositories.Interface;
 using Tickets.API.Helpers;
 using static Azure.Core.HttpHeader;
 using System.Runtime.CompilerServices;
+using System.Net.Sockets;
 
 namespace Tickets.API.Repositories.Implementation
 {
@@ -225,6 +226,86 @@ namespace Tickets.API.Repositories.Implementation
                         EstatusColor = ticket.Estatus.Color,
                         FechaCreacion = ticket.FechaCreacion.ToString("dd/MM/yyyy")
                     });
+                }
+                rm.result = ticketsDto;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+
+        public async Task<ResponseModel> GetSupervisorTicketDetalle(Guid ticketId, Guid usuarioId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+
+                //this.ticketsDbContext.RelCategoriaEquipos.IntersectBy(x=>x.Equipo.RelUsuarioEquipos.Where(y=>y.UsuarioId == usuarioId), u=>u.EquipoId)
+                // this.ticketsDbContext.SubCategoria.Where(x=>x.Categoria.RelCategoriaEquipos.IntersectBy())
+                var ticket = await this.ticketsDbContext.Tickets
+                            .Include(x => x.Estatus)
+                            .Include(x => x.Departamento)
+                            .Include(x => x.Prioridad)
+                            .Include(x => x.UsuarioCreacion)
+                            .Include(x => x.SubCategoria)
+                            .Include(x => x.SubCategoria.Categoria.Sucursal)
+                            .ThenInclude(x => x.Categoria)
+                            .ThenInclude(x => x.RelCategoriaEquipos)
+                            .ThenInclude(x => x.Equipo)
+                            .Include(x => x.TicketComentarios)
+                            
+                            .Include(x=>x.TicketArchivos)
+                            .Where(x => (x.Id == ticketId) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x => x.Equipo.RelUsuarioEquipos.Any(y => y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true)))
+                            .FirstOrDefaultAsync();
+
+                if(ticket == null)
+                {
+                    return rm;
+                }
+                TicketDetalleDto ticketsDto = new TicketDetalleDto()
+                {
+                    Id = ticket.Id,
+                    Folio = ticket.Folio,
+                    Solicitante = ticket.UsuarioCreacion.Apellidos + " " + ticket.UsuarioCreacion.Nombre,
+                    Subcategoria = ticket.SubCategoria.Nombre,
+                    Categoria = ticket.SubCategoria.Categoria.Nombre,
+                    Sucursal = ticket.SubCategoria.Categoria.Sucursal.Nombre,
+                    Departamento = ticket.Departamento.Clave + "-" + ticket.Departamento.Descripcion,
+                    Area = ticket.AreaString,
+                    Titulo = ticket.Titulo,
+                    Prioridad = ticket.Prioridad.Nombre,
+                    NivelDePrioridad = ticket.Prioridad.NivelDePrioridad,
+                    Color = ticket.Prioridad.Color,
+                    Estatus = ticket.Estatus.Descripcion,
+                    EstatusColor = ticket.Estatus.Color,
+                    Descripcion = ticket.Descripcion,
+                    FechaCreacion = ticket.FechaCreacion.ToString("dd/MM/yyyy"),
+                    Archivos = ticket.TicketArchivos.Select(x => new TicketDetalleArchivoDto() {
+                        Id = x.Id,
+                        Tipo = x.Tipo.Replace(".", "").ToLower(),
+                        Fecha = x.Fecha,
+                        Nombre = x.Nombre,
+                        NombreFisico = x.NombreFisico,
+                        Tamano = x.Tamaño,
+                        UsuarioId = x.UsuarioId
+                    }).ToList(),
+                    Comentarios = ticket.TicketComentarios.Select(x => new TicketDetalleComentarioDto() {
+                        Id = x.Id,
+                        Fecha = x.Fecha,
+                        Texto = x.Texto,
+                        UsuarioId = x.UsuarioId,
+                        Nombre = ""
+                    }).ToList()
+                };
+               
+                foreach(var item in ticketsDto.Comentarios)
+                {
+                    Usuario usuario = await this.ticketsDbContext.Usuarios.Where(x=>x.Id == item.UsuarioId).FirstOrDefaultAsync();
+                    item.Nombre = usuario.Apellidos.Trim() + " " + usuario.Nombre.Trim();
                 }
                 rm.result = ticketsDto;
                 rm.SetResponse(true, "Datos guardados con éxito.");

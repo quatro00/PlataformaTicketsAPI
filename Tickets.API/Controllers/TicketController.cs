@@ -130,5 +130,19 @@ namespace Tickets.API.Controllers
 
             return Ok(response.result);
         }
+        [HttpGet("GetSupervisorTicketDetalle/{id:Guid}")]
+        [Authorize(Roles = "Supervisor")]
+        public async Task<IActionResult> GetSupervisorTicketDetalle([FromRoute] Guid id)
+        {
+            var response = await ticketRepository.GetSupervisorTicketDetalle(id, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok(response.result);
+        }
     }
 }

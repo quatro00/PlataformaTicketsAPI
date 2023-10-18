@@ -11,5 +11,7 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> AsignarUsuario(AsignarUsuarioDto request);
         Task<ResponseModel> DesasignarUsuario(AsignarUsuarioDto request);
         Task<ResponseModel> GetEquiposSucursal(GetEquipoSucursalDto model);
+        //Obtiene los agente asociados a un supervisor y que pueden atender el tickcet seleccionado
+        Task<ResponseModel> GetAgentesBySupervisor(Guid supervisorId, Guid ticketId);
     }
 }

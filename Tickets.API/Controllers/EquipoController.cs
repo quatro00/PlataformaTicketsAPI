@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Tickets.API.Data;
 using Tickets.API.Helpers;
+using Tickets.API.Models.DTO.Area;
 using Tickets.API.Models.DTO.Equipo;
 using Tickets.API.Models.DTO.Prioridad;
 using Tickets.API.Repositories.Implementation;
@@ -107,6 +108,23 @@ namespace Tickets.API.Controllers
         {
             request.EsSupervisor = true;
             var response = await equipoRepository.DesasignarUsuario(request);
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            return Ok(response.result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Supervisor")]
+        [Route("GetAgentesBySupervisor")]
+
+        
+        public async Task<IActionResult> GetAgentesBySupervisor([FromQuery] GetAreasByDepartamentoRequestDto request)
+        {
+            //User.FindFirst("Id").Value
+            var response = await equipoRepository.GetAgentesBySupervisor(Guid.Parse(User.GetId()), (request.DepartamentoId));
             if (!response.response)
             {
                 ModelState.AddModelError("error", response.message);
