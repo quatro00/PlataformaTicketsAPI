@@ -47,6 +47,10 @@ public partial class Ticket
 
     public virtual ICollection<TicketComentario> TicketComentarios { get; set; } = new List<TicketComentario>();
 
+    public virtual ICollection<TicketMaterial> TicketMaterials { get; set; } = new List<TicketMaterial>();
+
+    public virtual ICollection<TicketUsuariosAsignado> TicketUsuariosAsignados { get; set; } = new List<TicketUsuariosAsignado>();
+
     public virtual Usuario UsuarioCreacion { get; set; } = null!;
 
     public virtual Usuario? UsuarioUltimaModificacionNavigation { get; set; }

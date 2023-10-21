@@ -120,7 +120,6 @@ namespace Tickets.API.Controllers
         [Authorize(Roles = "Supervisor")]
         [Route("GetAgentesBySupervisor")]
 
-        
         public async Task<IActionResult> GetAgentesBySupervisor([FromQuery] GetAreasByDepartamentoRequestDto request)
         {
             //User.FindFirst("Id").Value

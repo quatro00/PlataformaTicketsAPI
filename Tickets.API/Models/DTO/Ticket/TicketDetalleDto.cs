@@ -20,9 +20,10 @@ namespace Tickets.API.Models.DTO.Ticket
         public string EstatusColor { get; set; }
         public string FechaCreacion { get; set; }
         public string Descripcion { get; set; }
-        public List<TicketDetalleArchivoDto> Archivos { get; set; }
-        public List<TicketDetalleComentarioDto> Comentarios { get; set; }
-
+        public List<TicketDetalleArchivoDto> Archivos { get; set; } = new List<TicketDetalleArchivoDto>();
+        public List<TicketDetalleComentarioDto> Comentarios { get; set; } = new List<TicketDetalleComentarioDto>();
+        public List<TicketUsuarioAsignadoDto> Asignados { get; set; } = new List<TicketUsuarioAsignadoDto>();
+        public List<TicketMaterialDto> Materiales { get; set; } = new List<TicketMaterialDto>();
     }
 
     public class TicketDetalleArchivoDto
@@ -42,5 +43,19 @@ namespace Tickets.API.Models.DTO.Ticket
         public string Texto { get; set; }
         public DateTime Fecha { get; set; }
         public string Nombre { get; set; }
+    }
+    public class TicketUsuarioAsignadoDto
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; set; }
+    }
+    public class TicketMaterialDto
+    {
+        public Guid Id { get; set; }
+        public string Concepto { get; set; }
+        public string Tipo { get; set; }
+        public string Unidad { get; set; }
+        public decimal Cantidad { get; set; }
+        public decimal Precio { get; set; }
     }
 }

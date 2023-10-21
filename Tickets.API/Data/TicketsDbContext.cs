@@ -54,6 +54,10 @@ public partial class TicketsDbContext : DbContext
 
     public virtual DbSet<TicketEstatus> TicketEstatuses { get; set; }
 
+    public virtual DbSet<TicketMaterial> TicketMaterials { get; set; }
+
+    public virtual DbSet<TicketUsuariosAsignado> TicketUsuariosAsignados { get; set; }
+
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -403,6 +407,49 @@ public partial class TicketsDbContext : DbContext
             entity.Property(e => e.EstatusId).ValueGeneratedNever();
             entity.Property(e => e.Color).HasMaxLength(50);
             entity.Property(e => e.Descripcion).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<TicketMaterial>(entity =>
+        {
+            entity.ToTable("TicketMaterial");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Cantidad).HasColumnType("numeric(18, 2)");
+            entity.Property(e => e.Concepto)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.Precio).HasColumnType("numeric(18, 2)");
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Ticket).WithMany(p => p.TicketMaterials)
+                .HasForeignKey(d => d.TicketId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketMaterial_Ticket");
+        });
+
+        modelBuilder.Entity<TicketUsuariosAsignado>(entity =>
+        {
+            entity.HasKey(e => new { e.TicketId, e.UsuarioId });
+
+            entity.Property(e => e.FechaCreacion).HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Ticket).WithMany(p => p.TicketUsuariosAsignados)
+                .HasForeignKey(d => d.TicketId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketUsuariosAsignados_Ticket");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.TicketUsuariosAsignados)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TicketUsuariosAsignados_Usuario");
         });
 
         modelBuilder.Entity<Usuario>(entity =>

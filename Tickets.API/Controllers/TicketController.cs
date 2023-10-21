@@ -130,6 +130,7 @@ namespace Tickets.API.Controllers
 
             return Ok(response.result);
         }
+       
         [HttpGet("GetSupervisorTicketDetalle/{id:Guid}")]
         [Authorize(Roles = "Supervisor")]
         public async Task<IActionResult> GetSupervisorTicketDetalle([FromRoute] Guid id)
@@ -142,6 +143,36 @@ namespace Tickets.API.Controllers
                 return ValidationProblem(ModelState);
             }
 
+            return Ok(response.result);
+        }
+
+        [HttpPost("AsignarAgentes")]
+        [Authorize(Roles = "Supervisor,Administrador")]
+        public async Task<IActionResult> AsignarAgentes(TicketAsignarUsuariosDto model)
+        {
+            var response = await ticketRepository.AsignarTicketAgente(model.ticketId, model.agentes, Guid.Parse(User.GetId()), model.observaciones);
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            response.result = model;
+            return Ok(response.result);
+        }
+
+        [HttpPost("CrearTicketMaterial")]
+        [Authorize(Roles = "Supervisor,Administrador,Agente")]
+        public async Task<IActionResult> CrearTicketMaterial(CapturaMaterialesRequestDto model)
+        {
+            var response = await ticketRepository.CrearTicketMaterial(model, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            response.result = model;
             return Ok(response.result);
         }
     }

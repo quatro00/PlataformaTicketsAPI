@@ -10,5 +10,7 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> GetUsuarioTickets(int? estatusId, Guid usuarioId);
         Task<ResponseModel> GetSupervisorTickets(int? estatusId, Guid usuarioId);
         Task<ResponseModel> GetSupervisorTicketDetalle(Guid ticketId, Guid usuarioId);
+        Task<ResponseModel> AsignarTicketAgente(Guid ticketId, List<Guid> agentes, Guid usuarioId, string observaciones);
+        Task<ResponseModel> CrearTicketMaterial(CapturaMaterialesRequestDto request, Guid userId);
     }
 }

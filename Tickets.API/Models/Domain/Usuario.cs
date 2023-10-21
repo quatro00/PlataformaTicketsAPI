@@ -42,4 +42,6 @@ public partial class Usuario
     public virtual ICollection<Ticket> TicketUsuarioCreacions { get; set; } = new List<Ticket>();
 
     public virtual ICollection<Ticket> TicketUsuarioUltimaModificacionNavigations { get; set; } = new List<Ticket>();
+
+    public virtual ICollection<TicketUsuariosAsignado> TicketUsuariosAsignados { get; set; } = new List<TicketUsuariosAsignado>();
 }

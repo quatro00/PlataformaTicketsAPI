@@ -9,6 +9,7 @@ using Tickets.API.Helpers;
 using static Azure.Core.HttpHeader;
 using System.Runtime.CompilerServices;
 using System.Net.Sockets;
+using Azure.Core;
 
 namespace Tickets.API.Repositories.Implementation
 {
@@ -197,12 +198,7 @@ namespace Tickets.API.Repositories.Implementation
                             .ThenInclude(x => x.Categoria)
                             .ThenInclude(x => x.RelCategoriaEquipos)
                             .ThenInclude(x=>x.Equipo)
-                            
-                            .Where(x=> (x.EstatusId == estatusId || estatusId == 0) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x=>x.Equipo.RelUsuarioEquipos.Any(y=>y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true))
-                            
-                            
-                            
-                            )
+                            .Where(x=> (x.EstatusId != 4) && (x.EstatusId == estatusId || estatusId == 0) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x=>x.Equipo.RelUsuarioEquipos.Any(y=>y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true)))
                             .ToListAsync();
 
                 List<TicketDto> ticketsDto = new List<TicketDto>();
@@ -237,7 +233,6 @@ namespace Tickets.API.Repositories.Implementation
             }
             return rm;
         }
-
         public async Task<ResponseModel> GetSupervisorTicketDetalle(Guid ticketId, Guid usuarioId)
         {
             ResponseModel rm = new ResponseModel();
@@ -252,13 +247,14 @@ namespace Tickets.API.Repositories.Implementation
                             .Include(x => x.Prioridad)
                             .Include(x => x.UsuarioCreacion)
                             .Include(x => x.SubCategoria)
+                            .Include(x => x.TicketMaterials)
                             .Include(x => x.SubCategoria.Categoria.Sucursal)
                             .ThenInclude(x => x.Categoria)
                             .ThenInclude(x => x.RelCategoriaEquipos)
                             .ThenInclude(x => x.Equipo)
                             .Include(x => x.TicketComentarios)
-                            
                             .Include(x=>x.TicketArchivos)
+                            .Include(x=>x.TicketUsuariosAsignados).ThenInclude(x=>x.Usuario)
                             .Where(x => (x.Id == ticketId) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x => x.Equipo.RelUsuarioEquipos.Any(y => y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true)))
                             .FirstOrDefaultAsync();
 
@@ -268,6 +264,7 @@ namespace Tickets.API.Repositories.Implementation
                 }
                 TicketDetalleDto ticketsDto = new TicketDetalleDto()
                 {
+                 
                     Id = ticket.Id,
                     Folio = ticket.Folio,
                     Solicitante = ticket.UsuarioCreacion.Apellidos + " " + ticket.UsuarioCreacion.Nombre,
@@ -299,7 +296,17 @@ namespace Tickets.API.Repositories.Implementation
                         Texto = x.Texto,
                         UsuarioId = x.UsuarioId,
                         Nombre = ""
-                    }).ToList()
+                    }).ToList(),
+                    Materiales = ticket.TicketMaterials.Select(x=> new TicketMaterialDto()
+                    {
+                        Id = x.Id,
+                        Concepto = x.Concepto,  
+                        Tipo=x.Tipo,
+                        Unidad=x.Unidad,
+                        Cantidad = x.Cantidad ?? 0,
+                        Precio = x.Precio ?? 0
+                    }).ToList(),
+                    Asignados = ticket.TicketUsuariosAsignados.Select(x=> new TicketUsuarioAsignadoDto() { Id = x.UsuarioId, Nombre = x.Usuario.Apellidos.Trim() + " " + x.Usuario.Nombre}).ToList()
                 };
                
                 foreach(var item in ticketsDto.Comentarios)
@@ -308,6 +315,81 @@ namespace Tickets.API.Repositories.Implementation
                     item.Nombre = usuario.Apellidos.Trim() + " " + usuario.Nombre.Trim();
                 }
                 rm.result = ticketsDto;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+        public async Task<ResponseModel> AsignarTicketAgente(Guid ticketId, List<Guid> agentes, Guid usuarioId, string observaciones)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+               await this.ticketsDbContext.TicketUsuariosAsignados.Where(x => x.TicketId == ticketId).ExecuteDeleteAsync();
+                await this.ticketsDbContext.SaveChangesAsync();
+                //colocamos los asignados
+                foreach (var item in agentes)
+                {
+                    await this.ticketsDbContext.TicketUsuariosAsignados.AddAsync(new TicketUsuariosAsignado()
+                    {
+                        TicketId = ticketId,
+                        UsuarioId = item,
+                        FechaCreacion =DateTime.Now,
+                        UsuarioCreacion = usuarioId,
+                        Activo = true
+                    });
+                }
+
+                //generamos el comentario
+                TicketComentario ticketComentario = new TicketComentario()
+                {
+                    Id = Guid.NewGuid(),
+                    TicketId = ticketId,
+                    UsuarioId = usuarioId,
+                    Texto = "[Estatus: En atención]:"+observaciones,
+                    Fecha = DateTime.Now
+                };
+
+                await this.ticketsDbContext.Tickets.Where(x=>x.Id == ticketId).ExecuteUpdateAsync(x => x.SetProperty(y => y.EstatusId, 2));
+                await this.ticketsDbContext.TicketComentarios.AddAsync(ticketComentario);
+                await this.ticketsDbContext.SaveChangesAsync();
+                
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+        public async Task<ResponseModel> CrearTicketMaterial(CapturaMaterialesRequestDto request, Guid userId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                //Generamos el id del ticket
+                var id = Guid.NewGuid();
+                TicketMaterial ticketMaterial = new TicketMaterial()
+                {
+                    Id = id,
+                    TicketId = request.TicketId,
+                    Concepto = request.Concepto,
+                    Tipo = request.Tipo,
+                    Unidad = request.Unidad,
+                    Cantidad = request.Cantidad,
+                    Precio = request.Precio,
+                    Activo = true,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = userId
+                };
+
+                await ticketsDbContext.TicketMaterials.AddAsync(ticketMaterial);
+                await ticketsDbContext.SaveChangesAsync();
                 rm.SetResponse(true, "Datos guardados con éxito.");
 
             }
