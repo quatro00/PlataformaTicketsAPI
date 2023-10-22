@@ -198,7 +198,7 @@ namespace Tickets.API.Repositories.Implementation
                             .ThenInclude(x => x.Categoria)
                             .ThenInclude(x => x.RelCategoriaEquipos)
                             .ThenInclude(x=>x.Equipo)
-                            .Where(x=> (x.EstatusId != 4) && (x.EstatusId == estatusId || estatusId == 0) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x=>x.Equipo.RelUsuarioEquipos.Any(y=>y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true)))
+                            .Where(x=> (x.EstatusId != 4 || estatusId == 4) && (x.EstatusId == estatusId || estatusId == 0) && x.SubCategoria.Categoria.RelCategoriaEquipos.Any(x=>x.Equipo.RelUsuarioEquipos.Any(y=>y.UsuarioId == usuarioId && y.EsSupervisor == true && y.Activo == true)))
                             .ToListAsync();
 
                 List<TicketDto> ticketsDto = new List<TicketDto>();
@@ -390,6 +390,104 @@ namespace Tickets.API.Repositories.Implementation
 
                 await ticketsDbContext.TicketMaterials.AddAsync(ticketMaterial);
                 await ticketsDbContext.SaveChangesAsync();
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+
+        public async Task<ResponseModel> BorrarTicketMaterial(BorrarTicketMaterialDto request, Guid userId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                //validamos que el ticket este en atencion
+                var ticket = await this.ticketsDbContext.Tickets.FindAsync(request.TicketId);
+                if (!(ticket.EstatusId == 2 || ticket.EstatusId == 3))
+                {
+                    rm.SetResponse(false, "el ticket debe estar en estatus: En atención o Pendiente");
+                    return rm;
+                }
+                this.ticketsDbContext.TicketMaterials.Where(x => x.Id == request.MaterialId && x.TicketId == request.TicketId).ExecuteDeleteAsync();
+                await ticketsDbContext.SaveChangesAsync();
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+
+        public async Task<ResponseModel> Cerrar(Guid ticketId, string observaciones, Guid userId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                //validamos que el ticket este en atencion
+                var ticket = await this.ticketsDbContext.Tickets.FindAsync(ticketId);
+                if (!(ticket.EstatusId == 2))
+                {
+                    rm.SetResponse(false, "el ticket debe estar en estatus: En atención");
+                    return rm;
+                }
+
+                //colocamos estatus de cerrado
+                TicketComentario ticketComentario = new TicketComentario()
+                {
+                    Id = Guid.NewGuid(),
+                    TicketId = ticketId,
+                    UsuarioId = userId,
+                    Texto = "[Estatus: Cerrado]:" + observaciones,
+                    Fecha = DateTime.Now
+                };
+
+                await this.ticketsDbContext.Tickets.Where(x => x.Id == ticketId).ExecuteUpdateAsync(x => x.SetProperty(y => y.EstatusId, 4));
+                await this.ticketsDbContext.TicketComentarios.AddAsync(ticketComentario);
+                await this.ticketsDbContext.SaveChangesAsync();
+
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
+
+        public async Task<ResponseModel> EnEspera(Guid ticketId, string observaciones, Guid userId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+                //validamos que el ticket este en atencion
+                var ticket = await this.ticketsDbContext.Tickets.FindAsync(ticketId);
+                if (!(ticket.EstatusId == 2))
+                {
+                    rm.SetResponse(false, "el ticket debe estar en estatus: En atención");
+                    return rm;
+                }
+
+                //colocamos estatus de cerrado
+                TicketComentario ticketComentario = new TicketComentario()
+                {
+                    Id = Guid.NewGuid(),
+                    TicketId = ticketId,
+                    UsuarioId = userId,
+                    Texto = "[Estatus: Pendiente]:" + observaciones,
+                    Fecha = DateTime.Now
+                };
+
+                await this.ticketsDbContext.Tickets.Where(x => x.Id == ticketId).ExecuteUpdateAsync(x => x.SetProperty(y => y.EstatusId, 3));
+                await this.ticketsDbContext.TicketComentarios.AddAsync(ticketComentario);
+                await this.ticketsDbContext.SaveChangesAsync();
+
                 rm.SetResponse(true, "Datos guardados con éxito.");
 
             }

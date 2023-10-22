@@ -161,11 +161,55 @@ namespace Tickets.API.Controllers
             return Ok(response.result);
         }
 
+        [HttpPost("Cerrar")]
+        [Authorize(Roles = "Supervisor,Administrador")]
+        public async Task<IActionResult> Cerrar(ActualizarEstatusDto model)
+        {
+            var response = await ticketRepository.Cerrar(model.TicketId, model.Observaciones, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            response.result = model;
+            return Ok(response.result);
+        }
+        [HttpPost("Pendiente")]
+        [Authorize(Roles = "Supervisor,Administrador")]
+        public async Task<IActionResult> Pendiente(ActualizarEstatusDto model)
+        {
+            var response = await ticketRepository.EnEspera(model.TicketId, model.Observaciones, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            response.result = model;
+            return Ok(response.result);
+        }
+
         [HttpPost("CrearTicketMaterial")]
         [Authorize(Roles = "Supervisor,Administrador,Agente")]
         public async Task<IActionResult> CrearTicketMaterial(CapturaMaterialesRequestDto model)
         {
             var response = await ticketRepository.CrearTicketMaterial(model, Guid.Parse(User.GetId()));
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            response.result = model;
+            return Ok(response.result);
+        }
+
+        [HttpPost("BorrarTicketMaterial")]
+        [Authorize(Roles = "Supervisor,Administrador,Agente")]
+        public async Task<IActionResult> BorrarTicketMaterial(BorrarTicketMaterialDto model)
+        {
+            var response = await ticketRepository.BorrarTicketMaterial(model, Guid.Parse(User.GetId()));
 
             if (!response.response)
             {
