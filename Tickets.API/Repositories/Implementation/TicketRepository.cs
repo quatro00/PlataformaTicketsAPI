@@ -324,6 +324,99 @@ namespace Tickets.API.Repositories.Implementation
             }
             return rm;
         }
+        public async Task<ResponseModel> GetTicketDetalle(Guid ticketId)
+        {
+            ResponseModel rm = new ResponseModel();
+            try
+            {
+
+                //this.ticketsDbContext.RelCategoriaEquipos.IntersectBy(x=>x.Equipo.RelUsuarioEquipos.Where(y=>y.UsuarioId == usuarioId), u=>u.EquipoId)
+                // this.ticketsDbContext.SubCategoria.Where(x=>x.Categoria.RelCategoriaEquipos.IntersectBy())
+                var ticket = await this.ticketsDbContext.Tickets
+                            .Include(x => x.Estatus)
+                            .Include(x => x.Departamento)
+                            .Include(x => x.Prioridad)
+                            .Include(x => x.UsuarioCreacion)
+                            .Include(x => x.SubCategoria)
+                            .Include(x => x.TicketMaterials)
+                            .Include(x => x.SubCategoria.Categoria.Sucursal)
+                            .ThenInclude(x => x.Categoria)
+                            .ThenInclude(x => x.RelCategoriaEquipos)
+                            .ThenInclude(x => x.Equipo)
+                            .Include(x => x.TicketComentarios)
+                            .Include(x => x.TicketArchivos)
+                            .Include(x => x.TicketUsuariosAsignados).ThenInclude(x => x.Usuario)
+                            .Where(x => (x.Id == ticketId))
+                            .FirstOrDefaultAsync();
+
+                if (ticket == null)
+                {
+                    return rm;
+                }
+                TicketDetalleDto ticketsDto = new TicketDetalleDto()
+                {
+
+                    Id = ticket.Id,
+                    Folio = ticket.Folio,
+                    Solicitante = ticket.UsuarioCreacion.Apellidos + " " + ticket.UsuarioCreacion.Nombre,
+                    Subcategoria = ticket.SubCategoria.Nombre,
+                    Categoria = ticket.SubCategoria.Categoria.Nombre,
+                    Sucursal = ticket.SubCategoria.Categoria.Sucursal.Nombre,
+                    Departamento = ticket.Departamento.Clave + "-" + ticket.Departamento.Descripcion,
+                    Area = ticket.AreaString,
+                    Titulo = ticket.Titulo,
+                    Prioridad = ticket.Prioridad.Nombre,
+                    NivelDePrioridad = ticket.Prioridad.NivelDePrioridad,
+                    Color = ticket.Prioridad.Color,
+                    Estatus = ticket.Estatus.Descripcion,
+                    EstatusColor = ticket.Estatus.Color,
+                    Descripcion = ticket.Descripcion,
+                    FechaCreacion = ticket.FechaCreacion.ToString("dd/MM/yyyy"),
+                    Archivos = ticket.TicketArchivos.Select(x => new TicketDetalleArchivoDto()
+                    {
+                        Id = x.Id,
+                        Tipo = x.Tipo.Replace(".", "").ToLower(),
+                        Fecha = x.Fecha,
+                        Nombre = x.Nombre,
+                        NombreFisico = x.NombreFisico,
+                        Tamano = x.Tamaño,
+                        UsuarioId = x.UsuarioId
+                    }).ToList(),
+                    Comentarios = ticket.TicketComentarios.Select(x => new TicketDetalleComentarioDto()
+                    {
+                        Id = x.Id,
+                        Fecha = x.Fecha,
+                        Texto = x.Texto,
+                        UsuarioId = x.UsuarioId,
+                        Nombre = ""
+                    }).ToList(),
+                    Materiales = ticket.TicketMaterials.Select(x => new TicketMaterialDto()
+                    {
+                        Id = x.Id,
+                        Concepto = x.Concepto,
+                        Tipo = x.Tipo,
+                        Unidad = x.Unidad,
+                        Cantidad = x.Cantidad ?? 0,
+                        Precio = x.Precio ?? 0
+                    }).ToList(),
+                    Asignados = ticket.TicketUsuariosAsignados.Select(x => new TicketUsuarioAsignadoDto() { Id = x.UsuarioId, Nombre = x.Usuario.Apellidos.Trim() + " " + x.Usuario.Nombre }).ToList()
+                };
+
+                foreach (var item in ticketsDto.Comentarios)
+                {
+                    Usuario usuario = await this.ticketsDbContext.Usuarios.Where(x => x.Id == item.UsuarioId).FirstOrDefaultAsync();
+                    item.Nombre = usuario.Apellidos.Trim() + " " + usuario.Nombre.Trim();
+                }
+                rm.result = ticketsDto;
+                rm.SetResponse(true, "Datos guardados con éxito.");
+
+            }
+            catch (Exception ex)
+            {
+                rm.SetResponse(false, "Ocurrio un error inesperado.");
+            }
+            return rm;
+        }
         public async Task<ResponseModel> AsignarTicketAgente(Guid ticketId, List<Guid> agentes, Guid usuarioId, string observaciones)
         {
             ResponseModel rm = new ResponseModel();

@@ -15,5 +15,6 @@ namespace Tickets.API.Repositories.Interface
         Task<ResponseModel> BorrarTicketMaterial(BorrarTicketMaterialDto request, Guid userId);
         Task<ResponseModel> Cerrar(Guid ticketId, string observaciones, Guid userId);
         Task<ResponseModel> EnEspera(Guid ticketId, string observaciones, Guid userId);
+        Task<ResponseModel> GetTicketDetalle(Guid ticketId);
     }
 }

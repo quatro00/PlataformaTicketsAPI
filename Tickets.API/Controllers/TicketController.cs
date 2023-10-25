@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Net.Http.Headers;
 using Tickets.API.Helpers;
+using Tickets.API.Models.Domain;
 using Tickets.API.Models.DTO.Categoria;
 using Tickets.API.Models.DTO.Ticket;
 using Tickets.API.Repositories.Implementation;
@@ -218,6 +219,24 @@ namespace Tickets.API.Controllers
             }
             response.result = model;
             return Ok(response.result);
+        }
+
+        [HttpGet("ImprimirOrdenDeServicio/{id:Guid}")]
+        //[Authorize(Roles = "Supervisor,Administrador,Agente")]
+        public async Task<IActionResult> ImprimirOrdenDeServicio([FromRoute] Guid id)
+        {
+            PdfFormater pdfFormater = new PdfFormater();
+            var response = await ticketRepository.GetTicketDetalle(id);
+
+            if (!response.response)
+            {
+                ModelState.AddModelError("error", response.message);
+                return ValidationProblem(ModelState);
+            }
+            TicketDetalleDto ticketsDto = response.result;
+            var pdfBytes = pdfFormater.FormatoOrdenDeServicio(ticketsDto);
+
+            return File(pdfBytes, "application/pdf", $"Orden_de_servicio_{ticketsDto.Folio.ToString()}.pdf");
         }
     }
 }
