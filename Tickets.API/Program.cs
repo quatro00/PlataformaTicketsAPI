@@ -76,10 +76,10 @@ ExtensionMethod.claimsPrincipalHelper = app.Services.GetService<IClaimsPrincipal
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
+}
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions()
